@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的课表</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h3 {
+            color: #2c80b9;
+            margin: 0;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f0f7ff;
+            border-radius: 5px;
+        }
+        select {
+            padding: 5px;
+        }
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .schedule-table th, .schedule-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            height: 60px;
+        }
+        .schedule-table th {
+            background: #2c80b9;
+            color: white;
+        }
+        .time-slot {
+            background: #e6f2ff;
+            font-weight: bold;
+            width: 120px;
+        }
+        .course {
+            background: #f2e6f8;
+            font-weight: bold;
+        }
+        .empty {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h3>我的课表</h3>
+        </div>
+        
+        <div class="controls">
+            <div>
+                <span>第</span>
+                <select>
+                    <option>8</option>
+                    <option>9</option>
+                    <option>10</option>
+                </select>
+                <span>周/20周</span>
+            </div>
+            
+            <div>
+                <input type="date" value="2025-10-20">
+            </div>
+            
+            <div>
+                <span>时间模式：</span>
+                <select>
+                    <option>默认节次模式</option>
+                </select>
+            </div>
+        </div>
+        
+        <table class="schedule-table">
+            <thead>
+                <tr>
+                    <th>周/节次</th>
+                    <th>星期一</th>
+                    <th>星期二</th>
+                    <th>星期三</th>
+                    <th>星期四</th>
+                    <th>星期五</th>
+                    <th>星期六</th>
+                    <th>星期日</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="time-slot">第一二节<br>(01,02小节)</td>
+                    <td class="course">软件工程概论</td>
+                    <td class="course">Java程序..</td>
+                    <td class="course">概率论与数理..</td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                </tr>
+                <tr>
+                    <td class="time-slot">第三四节<br>(03,04小节)</td>
+                    <td class="course">Web前端开...</td>
+                    <td class="empty"></td>
+                    <td class="course">Web前端开...</td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                </tr>
+                <tr>
+                    <td class="time-slot">第五六节<br>(05,06小节)</td>
+                    <td class="empty"></td>
+                    <td class="course">Web前端开...</td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                </tr>
+                <tr>
+                    <td class="time-slot">第七八节<br>(07,08小节)</td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                </tr>
+                <tr>
+                    <td class="time-slot">第九十节<br>(09,10小节)</td>
+                    <td class="empty"></td>
+                    <td class="course">Web前端开...</td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                    <td class="empty"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

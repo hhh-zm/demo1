@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索历史自动显示</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .search-container {
+            background: white;
+            border-radius: 16px;
+            padding: 35px;
+            width: 100%;
+            max-width: 700px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-container h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+            text-align: center;
+            background: linear-gradient(90deg, #4a90e2, #6a11cb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            border: 2px solid #e1e5eb;
+            border-radius: 50px;
+            overflow: hidden;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .input-group:focus-within {
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+            background: white;
+        }
+
+        .search-icon {
+            padding: 0 20px;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+        }
+
+        #searchInput {
+            flex: 1;
+            padding: 18px 10px;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            outline: none;
+            color: #333;
+        }
+
+        .search-button {
+            background: linear-gradient(90deg, #4a90e2, #6a11cb);
+            color: white;
+            border: none;
+            padding: 0 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-button:hover {
+            background: linear-gradient(90deg, #357abd, #5a0cb9);
+            transform: scale(1.02);
+        }
+
+        .search-button:active {
+            transform: scale(0.98);
+        }
+
+        .history-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            margin-top: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border: 1px solid #e1e5eb;
+        }
+
+        .history-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .history-header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e1e5eb;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .history-header i {
+            margin-right: 10px;
+            color: #4a90e2;
+        }
+
+        .clear-btn {
+            margin-left: auto;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            color: #6c757d;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .clear-btn:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+            list-style: none;
+        }
+
+        .history-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item:hover {
+            background: #f8f9fa;
+        }
+
+        .history-item .text {
+            color: #333;
+            flex: 1;
+        }
+
+        .history-item .time {
+            color: #6c757d;
+            font-size: 12px;
+            margin-left: 15px;
+        }
+
+        .history-item .delete-btn {
+            color: #dc3545;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            margin-left: 10px;
+        }
+
+        .history-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .history-footer {
+            padding: 10px 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 12px;
+            border-top: 1px solid #e1e5eb;
+            background: #f8f9fa;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .search-tips {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .search-tips h3 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-tips h3 i {
+            color: #ffc107;
+        }
+
+        .search-tips ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .search-tips li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #666;
+        }
+
+        .tag {
+            background: #e9ecef;
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            background: #4a90e2;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.success {
+            background: #28a745;
+            color: white;
+        }
+
+        .notification.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .notification.info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .search-container {
+                padding: 25px;
+            }
+            
+            .search-container h1 {
+                font-size: 28px;
+            }
+            
+            .input-group {
+                flex-direction: column;
+                border-radius: 12px;
+            }
+            
+            .search-icon {
+                display: none;
+            }
+            
+            #searchInput {
+                padding: 15px;
+                text-align: center;
+            }
+            
+            .search-button {
+                padding: 15px;
+                justify-content: center;
+                border-radius: 0 0 12px 12px;
+            }
+            
+            .search-tips ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <h1>校园网搜索</h1>
+        <p class="subtitle">快速查找校园信息、课程资料、教务通知等</p>
+        
+        <div class="search-box">
+            <div class="input-group">
+                <i class="fas fa-search search-icon"></i>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="请输入关键词搜索..." 
+                    autocomplete="off"
+                >
+                <button id="searchBtn" class="search-button">
+                    <i class="fas fa-search"></i> 搜索
+                </button>
+            </div>
+            
+            <div class="history-dropdown" id="historyDropdown">
+                <div class="history-header">
+                    <i class="fas fa-history"></i>
+                    <span>搜索历史</span>
+                    <button id="clearHistory" class="clear-btn">清空历史</button>
+                </div>
+                <ul class="history-list" id="historyList">
+                    <!-- 历史记录将动态添加到这里 -->
+                </ul>
+                <div class="history-footer">
+                    最多保存10条搜索记录
+                </div>
+            </div>
+        </div>
+        
+        <div class="search-tips">
+            <h3><i class="fas fa-lightbulb"></i> 搜索提示</h3>
+            <ul>
+                <li>尝试搜索：<span class="tag">期末考试安排</span></li>
+                <li>热门搜索：<span class="tag">校园一卡通充值</span></li>
+                <li>常用功能：<span class="tag">选课系统登录</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM元素
+            const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const historyDropdown = document.getElementById('historyDropdown');
+            const historyList = document.getElementById('historyList');
+            const clearHistoryBtn = document.getElementById('clearHistory');
+            
+            // 常量
+            const MAX_HISTORY_ITEMS = 10;
+            const STORAGE_KEY = 'searchHistory';
+            
+            // 加载搜索历史
+            let searchHistory = loadSearchHistory();
+            
+            // 搜索框获得焦点时显示历史记录
+            searchInput.addEventListener('focus', function() {
+                updateHistoryDropdown();
+                historyDropdown.classList.add('show');
+            });
+            
+            // 搜索框失去焦点时隐藏历史记录
+            searchInput.addEventListener('blur', function() {
+                setTimeout(() => {
+                    if (!historyDropdown.matches(':hover')) {
+                        historyDropdown.classList.remove('show');
+                    }
+                }, 200);
+            });
+            
+            // 保持下拉框在鼠标悬停时不隐藏
+            historyDropdown.addEventListener('mouseenter', function() {
+                this.classList.add('show');
+            });
+            
+            historyDropdown.addEventListener('mouseleave', function() {
+                this.classList.remove('show');
+            });
+            
+            // 搜索按钮点击事件
+            searchBtn.addEventListener('click', performSearch);
+            
+            // 回车键搜索
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            // 清空历史记录
+            clearHistoryBtn.addEventListener('click', function() {
+                if (confirm('确定要清空所有搜索历史吗？')) {
+                    searchHistory = [];
+                    saveSearchHistory();
+                    updateHistoryDropdown();
+                    showNotification('搜索历史已清空', 'info');
+                }
+            });
+            
+            // 执行搜索函数
+            function performSearch() {
+                const searchTerm = searchInput.value.trim();
+                
+                if (!searchTerm) {
+                    showNotification('请输入搜索关键词', 'warning');
+                    searchInput.focus();
+                    return;
+                }
+                
+                // 添加到搜索历史
+                addToSearchHistory(searchTerm);
+                
+                // 显示搜索反馈
+                showNotification(`正在搜索: "${searchTerm}"`, 'success');
+                
+                // 模拟搜索过程
+                setTimeout(() => {
+                    showNotification(`找到关于"${searchTerm}"的156条结果`, 'success');
+                    
+                    // 清空输入框
+                    searchInput.value = '';
+                    
+                    // 隐藏历史记录下拉框
+                    historyDropdown.classList.remove('show');
+                }, 800);
+            }
+            
+            // 添加到搜索历史
+            function addToSearchHistory(term) {
+                // 移除重复项
+                const existingIndex = searchHistory.findIndex(item => item.text === term);
+                if (existingIndex !== -1) {
+                    searchHistory.splice(existingIndex, 1);
+                }
+                
+                // 添加到最前面
+                const historyItem = {
+                    text: term,
+                    timestamp: new Date().toISOString(),
+                    timeDisplay: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
+                
+                searchHistory.unshift(historyItem);
+                
+                // 限制历史记录数量
+                if (searchHistory.length > MAX_HISTORY_ITEMS) {
+                    searchHistory = searchHistory.slice(0, MAX_HISTORY_ITEMS);
+                }
+                
+                // 保存并更新显示
+                saveSearchHistory();
+                updateHistoryDropdown();
+            }
+            
+            // 更新历史记录下拉列表
+            function updateHistoryDropdown() {
+                historyList.innerHTML = '';
+                
+                if (searchHistory.length === 0) {
+                    const emptyItem = document.createElement('li');
+                    emptyItem.className = 'history-item';
+                    emptyItem.innerHTML = '<span class="text" style="color:#6c757d; font-style:italic;">暂无搜索历史</span>';
+                    historyList.appendChild(emptyItem);
+                    return;
+                }
+                
+                searchHistory.forEach((item, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'history-item';
+                    li.innerHTML = `
+                        <span class="text">${escapeHtml(item.text)}</span>
+                        <span class="time">${item.timeDisplay}</span>
+                        <button class="delete-btn" data-index="${index}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    // 点击历史记录项，填充到搜索框
+                    li.addEventListener('click', function(e) {
+                        if (!e.target.closest('.delete-btn')) {
+                            searchInput.value = item.text;
+                            searchInput.focus();
+                            historyDropdown.classList.remove('show');
+                        }
+                    });
+                    
+                    // 删除单个历史记录
+                    const deleteBtn = li.querySelector('.delete-btn');
+                    deleteBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        deleteHistoryItem(index);
+                    });
+                    
+                    historyList.appendChild(li);
+                });
+            }
+            
+            // 删除单个历史记录项
+            function deleteHistoryItem(index) {
+                searchHistory.splice(index, 1);
+                saveSearchHistory();
+                updateHistoryDropdown();
+                showNotification('已删除该搜索记录', 'info');
+            }
+            
+            // 加载搜索历史从localStorage
+            function loadSearchHistory() {
+                try {
+                    const stored = localStorage.getItem(STORAGE_KEY);
+                    return stored ? JSON.parse(stored) : [];
+                } catch (error) {
+                    console.error('加载搜索历史失败:', error);
+                    return [];
+                }
+            }
+            
+            // 保存搜索历史到localStorage
+            function saveSearchHistory() {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(searchHistory));
+                } catch (error) {
+                    console.error('保存搜索历史失败:', error);
+                }
+            }
+            
+            // 显示通知
+            function showNotification(message, type = 'info') {
+                // 移除现有的通知
+                const existingNotification = document.querySelector('.notification');
+                if (existingNotification) {
+                    existingNotification.remove();
+                }
+                
+                // 创建新的通知
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                // 3秒后自动移除
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+            
+            // HTML转义函数
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            // 点击搜索提示标签
+            document.querySelectorAll('.tag').forEach(tag => {
+                tag.addEventListener('click', function() {
+                    searchInput.value = this.textContent;
+                    searchInput.focus();
+                });
+            });
+            
+            // 初始加载时更新历史记录显示
+            updateHistoryDropdown();
+        });
+    </script>
+</body>
+</html>
